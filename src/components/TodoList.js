@@ -27,6 +27,8 @@ import {
 const todoCollection = collection(db, "todos");
 
 // TodoList 컴포넌트를 정의합니다.
+// TodoList 컴포넌트 내에 새로운 상태 추가
+const [newTodoDate, setNewTodoDate] = useState('');
 const TodoList = () => {
   // 상태를 관리하는 useState 훅을 사용하여 할 일 목록과 입력값을 초기화합니다.
   const [todos, setTodos] = useState([]);
@@ -67,16 +69,18 @@ const TodoList = () => {
   //   completed: 완료 여부,
   // }
   // ...todos => {id: 1, text: "할일1", completed: false}, {id: 2, text: "할일2", completed: false}}, ..
-
+  
   // Firestore 에 추가한 할 일을 저장합니다.
   const docRef = await addDoc(todoCollection, {
     text: input,
     completed: false,
+    date: newTodoDate // 날짜 추가
   });
 
   // id 값을 Firestore 에 저장한 값으로 지정합니다.
   setTodos([...todos, { id: docRef.id, text: input, completed: false }]);
   setInput("");
+  setNewTodoDate(''); // 입력란 초기화
 };
 
   // toggleTodo 함수는 체크박스를 눌러 할 일의 완료 상태를 변경하는 함수입니다.
@@ -126,6 +130,12 @@ const TodoList = () => {
         className={styles.itemInput}
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        
+      />
+      <input
+        type="date"
+        value={newTodoDate}
+        onChange={(e) => setNewTodoDate(e.target.value)}
       />
       {/* 할 일을 추가하는 버튼입니다. */}
       <button className={styles.addButton} onClick={addTodo}>
@@ -144,6 +154,11 @@ const TodoList = () => {
       </ul>
     </div>
   );
+};
+
+const sortTodosByDate = () => {
+  const sortedTodos = [...todos].sort((a, b) => new Date(a.date) - new Date(b.date));
+  setTodos(sortedTodos);
 };
 
 export default TodoList;
